@@ -1,0 +1,7 @@
+An adapter for using hiredis with the Boost.Asio Reactor
+
+Dump the files in your hiredis source directory, and then build it like this:
+g++ -ggdb -lboost_system -lhiredis example-boostasio.cpp boostasio.cpp
+
+ryan.graham@gmail.com
+
