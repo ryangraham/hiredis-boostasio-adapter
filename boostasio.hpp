@@ -1,8 +1,8 @@
 #ifndef __HIREDIS_BOOSTASIO_H__
 #define __HIREDIS_BOOSTASIO_H__
 
-#include "hiredis.h"
-#include "async.h"
+#include <hiredis/hiredis.h>
+#include <hiredis/async.h>
 
 #include <iostream>
 #include <string>
