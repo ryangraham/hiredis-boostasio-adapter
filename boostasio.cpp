@@ -24,15 +24,8 @@ redisBoostClient::redisBoostClient(boost::asio::io_service& io_service,redisAsyn
 	ac->ev.delWrite = call_C_delWrite;
 	ac->ev.cleanup = call_C_cleanup;
 
-	/*I don't know whether this even gets used, but...*/
-	ac->ev.data = ac;
-
-	/*C wrapper functions will use this
-	 *pointer to call class members.
-	 *fortunately hiredis doesn't use the data field.
-	 *see line 70 of async.h
-	 */
-	ac->data = this;
+	/*C wrapper functions will use this pointer to call class members.*/
+	ac->ev.data = this;
 }
 
 void redisBoostClient::operate()
@@ -72,68 +65,64 @@ void redisBoostClient::handle_write(boost::system::error_code ec)
 		operate();
 }
 
-void redisBoostClient::add_read(void *privdata) 
+void redisBoostClient::add_read()
 {
 	read_requested_ = true;
 	operate();
 }
 
-void redisBoostClient::del_read(void *privdata) 
+void redisBoostClient::del_read()
 {
 	read_requested_ = false;
 }
 
-void redisBoostClient::add_write(void *privdata) 
+void redisBoostClient::add_write()
 {
 	write_requested_ = true;
 	operate();
 }
 
-void redisBoostClient::del_write(void *privdata) 
+void redisBoostClient::del_write()
 {
 	write_requested_ = false;
 }
 
-void redisBoostClient::cleanup(void *privdata) 
+void redisBoostClient::cleanup()
 {
 	/*Do I even need this?*/
 	printf("cleanup called...\n");	
 }
 
+static inline redisBoostClient * cast_to_client(void *privdata)
+{
+	assert(privdata);
+	return static_cast<redisBoostClient *>(privdata);
+}
+
 /*wrappers*/
 extern "C" void call_C_addRead(void *privdata)
 {
-	redisAsyncContext *ac = (redisAsyncContext*)privdata;
-	redisBoostClient *C = (redisBoostClient*)ac->data;
-	C->add_read(privdata);
+	cast_to_client(privdata)->add_read();
 }
 
 extern "C" void call_C_delRead(void *privdata)
 {
-        redisAsyncContext *ac = (redisAsyncContext*)privdata;
-        redisBoostClient *C = (redisBoostClient*)ac->data;
-        C->del_read(privdata);
+	cast_to_client(privdata)->del_read();
 }
 
 extern "C" void call_C_addWrite(void *privdata)
 {
-        redisAsyncContext *ac = (redisAsyncContext*)privdata;
-        redisBoostClient *C = (redisBoostClient*)ac->data;
-        C->add_write(privdata);
+	cast_to_client(privdata)->add_write();
 }
 
 extern "C" void call_C_delWrite(void *privdata)
 {
-        redisAsyncContext *ac = (redisAsyncContext*)privdata;
-        redisBoostClient *C = (redisBoostClient*)ac->data;
-        C->del_write(privdata);
+	cast_to_client(privdata)->del_write();
 }
 
 extern "C" void call_C_cleanup(void *privdata)
 {
-        redisAsyncContext *ac = (redisAsyncContext*)privdata;
-        redisBoostClient *C = (redisBoostClient*)ac->data;
-        C->cleanup(privdata);
+	cast_to_client(privdata)->cleanup();
 }
 /*end of wrappers*/
 

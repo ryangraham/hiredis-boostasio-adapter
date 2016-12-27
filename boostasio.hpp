@@ -16,17 +16,17 @@ using boost::asio::ip::tcp;
 class redisBoostClient
 {
 public:
-        redisBoostClient(boost::asio::io_service& io_service,redisAsyncContext *ac);
+	redisBoostClient(boost::asio::io_service& io_service,redisAsyncContext *ac);
 
 	void operate();
 
 	void handle_read(boost::system::error_code ec);
-        void handle_write(boost::system::error_code ec);
-        void add_read(void *privdata);
-        void del_read(void *privdata);
-        void add_write(void *privdata);
-        void del_write(void *privdata);
-	void cleanup(void *privdata);
+	void handle_write(boost::system::error_code ec);
+	void add_read();
+	void del_read();
+	void add_write();
+	void del_write();
+	void cleanup();
 
 private:
 redisAsyncContext *context_;
