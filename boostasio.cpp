@@ -2,14 +2,15 @@
 
 
 redisBoostClient::redisBoostClient(boost::asio::io_service& io_service,redisAsyncContext *ac)
-: socket_(io_service)
+	: context_(ac),
+	socket_(io_service),
+	read_requested_(false),
+	write_requested_(false),
+	read_in_progress_(false),
+	write_in_progress_(false)
 {
-
 	/*this gives us access to c->fd*/
 	redisContext *c = &(ac->c);
-
-	/*pass this to hiredis hooks*/	
-	context_ = ac;		
 
 	/*hiredis already connected
 	 *use the existing native socket
